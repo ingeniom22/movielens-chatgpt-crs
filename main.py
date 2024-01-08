@@ -5,17 +5,16 @@ from dotenv import load_dotenv
 from langchain.agents import (
     AgentExecutor,
 )
+from langchain.agents.format_scratchpad import format_to_openai_function_messages
+from langchain.agents.output_parsers import OpenAIFunctionsAgentOutputParser
 from langchain.chat_models import ChatOpenAI
+from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain.tools import StructuredTool
+from langchain.tools.render import format_tool_to_openai_function
+from langchain_core.messages import AIMessage, HumanMessage
 from libreco.algorithms import DeepFM
 from libreco.data import DataInfo
 from pydantic.v1 import BaseModel, Field
-from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain.agents.format_scratchpad import format_to_openai_function_messages
-from langchain.agents.output_parsers import OpenAIFunctionsAgentOutputParser
-
-from langchain.tools.render import format_tool_to_openai_function
-from langchain_core.messages import AIMessage, HumanMessage
 
 load_dotenv()
 MODEL_PATH = "model"
@@ -32,7 +31,7 @@ model = DeepFM.load(
 
 class RecSysInput(BaseModel):
     uid: int = Field(description="User id")
-    k: int = Field(description="number of recommended")
+    k: int = Field(description="Number of movies to be recommended")
 
 
 def recommend_top_k(uid: int, k: int):
@@ -57,6 +56,7 @@ recsys = StructuredTool.from_function(
 
 
 tools = [
+    
     recsys,
     # human_input
 ]
@@ -118,6 +118,7 @@ while True:
             "chat_history": chat_history,
         }
     )
+    
     chat_history.extend(
         [
             HumanMessage(content=user_input),
