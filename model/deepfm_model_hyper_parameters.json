@@ -2,7 +2,7 @@
     "task":"ranking",
     "loss_type":"cross_entropy",
     "embed_size":16,
-    "n_epochs":2,
+    "n_epochs":5,
     "lr":0.0001,
     "lr_decay":false,
     "epsilon":1e-05,
@@ -11,11 +11,11 @@
     "sampler":"random",
     "num_neg":1,
     "use_bn":false,
-    "dropout_rate":null,
+    "dropout_rate":0.1,
     "hidden_units":[
-        128,
         64,
-        32
+        64,
+        64
     ],
     "multi_sparse_combiner":"sqrtn",
     "seed":42,

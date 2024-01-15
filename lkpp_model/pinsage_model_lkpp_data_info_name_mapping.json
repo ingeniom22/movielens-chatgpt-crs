@@ -1,0 +1,22 @@
+{
+    "sparse_col":{
+        "category":0,
+        "kode_provinsi":1,
+        "ippd":2,
+        "unit_kerja":3
+    },
+    "dense_col":{
+        "level_jabatan":0
+    },
+    "user_sparse_col":{
+        "kode_provinsi":1,
+        "ippd":2,
+        "unit_kerja":3
+    },
+    "user_dense_col":{
+        "level_jabatan":0
+    },
+    "item_sparse_col":{
+        "category":0
+    }
+}
