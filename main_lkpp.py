@@ -1,5 +1,5 @@
+# Import library yang diperlukan
 import json
-
 import tensorflow as tf
 from dotenv import load_dotenv
 from langchain.agents import AgentExecutor
@@ -14,24 +14,31 @@ from libreco.algorithms import PinSage
 from libreco.data import DataInfo
 from pydantic.v1 import BaseModel, Field
 
+# Load konfigurasi dari file .env
 load_dotenv()
 MODEL_PATH = "lkpp_model"
 
+# Load mapping untuk ID penyedia dari file JSON
 with open("penyedia_id_mappings.json", "r") as json_file:
     penyedia_id_mappings = json.load(json_file)
 
+# Reset graph TensorFlow yang ada
 tf.compat.v1.reset_default_graph()
+
+# Load informasi data dan model sistem rekomendasi
 data_info = DataInfo.load(MODEL_PATH, model_name="pinsage_model_lkpp")
 model = PinSage.load(
     path=MODEL_PATH, model_name="pinsage_model_lkpp", data_info=data_info, manual=True
 )
 
 
+# Definisikan model input untuk sistem rekomendasi
 class RecSysInput(BaseModel):
     uid: str = Field(description="User id")
     k: int = Field(description="Number of companies to be recommended")
 
 
+# Fungsi untuk merekomendasikan perusahaan
 def recommend_top_k(uid: str, k: int):
     """Retrieve top k recommended companies for a User"""
     prediction = model.recommend_user(
@@ -47,6 +54,7 @@ def recommend_top_k(uid: str, k: int):
     return info
 
 
+# Konversi fungsi rekomendasi menjadi tool terstruktur
 recsys = StructuredTool.from_function(
     func=recommend_top_k,
     name="RecSys",
@@ -55,14 +63,16 @@ recsys = StructuredTool.from_function(
     return_direct=False,
 )
 
-
+# List tools yang digunakan
 tools = [
     recsys,
     # human_input
 ]
 
-
+# Key untuk menyimpan riwayat obrolan dalam memory
 MEMORY_KEY = "chat_history"
+
+# Template prompt untuk percakapan
 prompt = ChatPromptTemplate.from_messages(
     [
         (
@@ -75,10 +85,13 @@ prompt = ChatPromptTemplate.from_messages(
     ]
 )
 
-
+# Inisialisasi model bahasa ChatGPT
 llm = ChatOpenAI(model_name="gpt-3.5-turbo", temperature=0.7)
+
+# Bind tools ke model bahasa
 llm_with_tools = llm.bind(functions=[format_tool_to_openai_function(t) for t in tools])
 
+# Konfigurasi agen percakapan
 agent = (
     {
         "input": lambda x: x["input"],
@@ -93,17 +106,25 @@ agent = (
     | llm_with_tools
     | OpenAIFunctionsAgentOutputParser()
 )
+
+# Inisialisasi executor untuk agen
 agent_executor = AgentExecutor(agent=agent, tools=tools, verbose=False)
 
+# User ID yang sudah diketahui (dapat diubah sesuai kebutuhan)
+known_user_uid = "PPK-000000587"
 
-# Main Program
-print("=============ChatRec=============")
-known_user_uid = "PPK-000000587"  # Jika uid ada pada training data
+# Inisialisasi riwayat obrolan
 chat_history = []
+
+# Input peran dari pengguna
 role = input("Masukkan Role: ")
+
+# Loop utama percakapan
 while True:
+    # Input dari pengguna
     user_input = input("User: ")
 
+    # Eksekusi agen untuk mendapatkan jawaban
     result = agent_executor.invoke(
         {
             "input": user_input,
@@ -113,8 +134,10 @@ while True:
         }
     )
 
+    # Tampilkan jawaban dari agen
     print(f"Agent: {result['output']}")
 
+    # Update riwayat obrolan
     chat_history.extend(
         [
             HumanMessage(content=user_input),
