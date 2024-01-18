@@ -252,28 +252,28 @@ ytb_ranking.fit(
 )
 
 
-# models = [deepfm, graphsage, pinsage, wd, ytb_ranking]
-# eval_results_list = []
-# for model in models:
-#     eval_result = evaluate(
-#         model=model,
-#         data=test_data,
-#         neg_sampling=True,
-#         eval_batch_size=8192,
-#         k=10,
-#         metrics=metrics,
-#         # sample_user_num=2048,
-#         seed=2222,
-#     )
-#     eval_result['model_name'] = str(model)
-#     eval_results_list.append(eval_result)
-#     print(eval_result)
+models = [deepfm, graphsage, pinsage, wd, ytb_ranking]
+eval_results_list = []
+for model in models:
+    eval_result = evaluate(
+        model=model,
+        data=test_data,
+        neg_sampling=True,
+        eval_batch_size=8192,
+        k=10,
+        metrics=metrics,
+        # sample_user_num=2048,
+        seed=2222,
+    )
+    eval_result['model_name'] = str(model)
+    eval_results_list.append(eval_result)
+    print(eval_result)
     
-# # Membuat dataframe dari list hasil evaluasi
-# df_eval_results = pd.DataFrame(eval_results_list)
+# Membuat dataframe dari list hasil evaluasi
+df_eval_results = pd.DataFrame(eval_results_list)
 
-# # Menyimpan dataframe ke dalam file CSV
-# df_eval_results.to_csv('eval_results.csv', index=False)
+# Menyimpan dataframe ke dalam file CSV
+df_eval_results.to_csv('eval_results_movielens.csv', index=False)
 
 # # save data_info, specify model save folder
 # data_info.save(path=MODEL_PATH, model_name="deepfm_model")
