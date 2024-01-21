@@ -1,5 +1,7 @@
 # Import library yang diperlukan
 import json
+from sqlalchemy import create_engine
+from sqlmodel import SQLModel, Session
 import tensorflow as tf
 from dotenv import load_dotenv
 from langchain.agents import AgentExecutor
@@ -14,12 +16,14 @@ from libreco.algorithms import DeepFM
 from libreco.data import DataInfo
 from pydantic.v1 import BaseModel, Field
 
+from database_models import ConversationHistory
+
 # Load konfigurasi dari file .env
 load_dotenv()
 MODEL_PATH = "model"
 
 # Load mapping untuk ID film dari file JSON
-with open("movie_id_mappings.json", "r") as json_file:
+with open("data/movie_id_mappings.json", "r") as json_file:
     movie_id_mappings = json.load(json_file)
 
 # Reset graph TensorFlow yang ada
@@ -30,6 +34,11 @@ data_info = DataInfo.load(MODEL_PATH, model_name="deepfm_model")
 model = DeepFM.load(
     path=MODEL_PATH, model_name="deepfm_model", data_info=data_info, manual=True
 )
+
+# inisialisasi database
+engine = create_engine("sqlite:///lkpp_conversation_history.db")
+SQLModel.metadata.create_all(engine)
+session = Session(engine)
 
 
 # Definisikan model input untuk sistem rekomendasi
@@ -63,6 +72,8 @@ recsys = StructuredTool.from_function(
 # List tools yang digunakan
 tools = [
     recsys,
+    # TODO: filter by genre/kategori (lkpp)
+    #
 ]
 
 # Key untuk menyimpan riwayat obrolan dalam memory
@@ -140,3 +151,12 @@ while True:
             AIMessage(content=result["output"]),
         ]
     )
+
+    # Add history ke db
+    conversation_entry = ConversationHistory(
+        user_id=known_user_uid, user_input=user_input, agent_output=result["output"]
+    )
+    session.add(conversation_entry)
+    session.commit()
+
+    # TODO: rekomendasi berdasarkan mood user

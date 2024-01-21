@@ -9,13 +9,14 @@ from libreco.algorithms import (
 )
 from libreco.data import DatasetFeat, split_by_ratio_chrono
 from libreco.evaluation import evaluate
+
 # from sklearn.preprocessing import LabelEncoder
 
 MODEL_PATH = "lkpp_model"
 tf.compat.v1.reset_default_graph()
 
 # data = pd.read_csv("sample_movielens_merged.csv", sep=",", header=0)
-data = pd.read_csv("dummy_lkpp.csv")
+data = pd.read_csv("data/dummy_lkpp.csv")
 
 print(data.columns)
 
@@ -264,6 +265,4 @@ for model in models:
 df_eval_results = pd.DataFrame(eval_results_list)
 
 # Menyimpan dataframe ke dalam file CSV
-df_eval_results.to_csv("eval_results_lkpp.csv", index=False)
-
-
+df_eval_results.to_csv("eval_results/eval_results_lkpp.csv", index=False)

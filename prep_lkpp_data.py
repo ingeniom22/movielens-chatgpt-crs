@@ -25,7 +25,7 @@ print(ppk_df.shape)
 
 print(df.head())
 
-df.to_csv("dummy_lkpp.csv", index=False)
+df.to_csv("data/dummy_lkpp.csv", index=False)
 
 
 company_df = pd.read_json("company_identity.jsonl", lines=True)[
@@ -33,5 +33,5 @@ company_df = pd.read_json("company_identity.jsonl", lines=True)[
 ]
 
 penyedia_id_dict = dict(zip(company_df["company_id"], company_df["penyedia"]))
-with open('penyedia_id_mappings.json', 'w') as json_file:
+with open("data/penyedia_id_mappings.json", "w") as json_file:
     json.dump(penyedia_id_dict, json_file)

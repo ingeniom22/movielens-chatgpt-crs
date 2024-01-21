@@ -1,5 +1,7 @@
 # Import library yang diperlukan
 import json
+from sqlalchemy import create_engine
+from sqlmodel import SQLModel, Session
 import tensorflow as tf
 from dotenv import load_dotenv
 from langchain.agents import AgentExecutor
@@ -13,13 +15,14 @@ from langchain_core.messages import AIMessage, HumanMessage
 from libreco.algorithms import PinSage
 from libreco.data import DataInfo
 from pydantic.v1 import BaseModel, Field
+from database_models import ConversationHistory
 
 # Load konfigurasi dari file .env
 load_dotenv()
 MODEL_PATH = "lkpp_model"
 
 # Load mapping untuk ID penyedia dari file JSON
-with open("penyedia_id_mappings.json", "r") as json_file:
+with open("data/penyedia_id_mappings.json", "r") as json_file:
     penyedia_id_mappings = json.load(json_file)
 
 # Reset graph TensorFlow yang ada
@@ -30,6 +33,11 @@ data_info = DataInfo.load(MODEL_PATH, model_name="pinsage_model_lkpp")
 model = PinSage.load(
     path=MODEL_PATH, model_name="pinsage_model_lkpp", data_info=data_info, manual=True
 )
+
+# inisialisasi database
+engine = create_engine("sqlite:///lkpp_conversation_history.db")
+SQLModel.metadata.create_all(engine)
+session = Session(engine)
 
 
 # Definisikan model input untuk sistem rekomendasi
@@ -144,3 +152,10 @@ while True:
             AIMessage(content=result["output"]),
         ]
     )
+
+    # Add history ke db
+    conversation_entry = ConversationHistory(
+        user_id=known_user_uid, user_input=user_input, agent_output=result["output"]
+    )
+    session.add(conversation_entry)
+    session.commit()

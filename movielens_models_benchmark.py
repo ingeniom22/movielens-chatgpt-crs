@@ -14,7 +14,7 @@ MODEL_PATH = "model"
 tf.compat.v1.reset_default_graph()
 
 # data = pd.read_csv("sample_movielens_merged.csv", sep=",", header=0)
-data = pd.read_csv("ml-100k-merged.csv")
+data = pd.read_csv("data/ml-100k-merged.csv")
 data.rename(
     {
         "user_id": "user",
@@ -265,15 +265,15 @@ for model in models:
         # sample_user_num=2048,
         seed=2222,
     )
-    eval_result['model_name'] = str(model)
+    eval_result["model_name"] = str(model)
     eval_results_list.append(eval_result)
     print(eval_result)
-    
+
 # Membuat dataframe dari list hasil evaluasi
 df_eval_results = pd.DataFrame(eval_results_list)
 
 # Menyimpan dataframe ke dalam file CSV
-df_eval_results.to_csv('eval_results_movielens.csv', index=False)
+df_eval_results.to_csv("eval_results/eval_results_movielens.csv", index=False)
 
 # # save data_info, specify model save folder
 # data_info.save(path=MODEL_PATH, model_name="deepfm_model")
